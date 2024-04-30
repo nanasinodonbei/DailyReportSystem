@@ -105,6 +105,31 @@ public class EmployeeController {
         return "employees/update";
     }
 
+    // 従業員更新処理
+    @PostMapping(value = "/{code}/update")
+    public String postUser(@Validated Employee employee, BindingResult res, Model model) {
+
+    // 入力チェック
+        if (res.hasErrors()) {
+            return "employees/update";
+        }
+
+       try {
+            ErrorKinds result = employeeService.update(employee);
+
+            if (ErrorMessage.contains(result)) {
+                model.addAttribute(ErrorMessage.getErrorName(result), ErrorMessage.getErrorValue(result));
+                return "employees/update";
+            }
+
+        } catch (DataIntegrityViolationException e) {
+            model.addAttribute(ErrorMessage.getErrorName(ErrorKinds.DUPLICATE_EXCEPTION_ERROR),
+                    ErrorMessage.getErrorValue(ErrorKinds.DUPLICATE_EXCEPTION_ERROR));
+            return "employees/update";
+        }
+
+        return "redirect:/employees";
+    }
 
     // 従業員削除処理
     @PostMapping(value = "/{code}/delete")

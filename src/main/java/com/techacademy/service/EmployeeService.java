@@ -52,6 +52,32 @@ public class EmployeeService {
         return ErrorKinds.SUCCESS;
     }
 
+    @Transactional // 従業員更新
+    public ErrorKinds update(Employee employee) {
+       
+        if ("".equals(employee.getPassword())) {
+
+            Employee existingEmployee = findByCode(employee.getCode());
+            employee.setPassword(existingEmployee.getPassword());
+
+        } else {
+            ErrorKinds result = employeePasswordCheck(employee);
+            if (ErrorKinds.CHECK_OK != result) {
+                return result;
+            }
+        }
+        
+        LocalDateTime now = LocalDateTime.now();
+        employee.setUpdatedAt(now);
+
+        Employee newCreat = findByCode(employee.getCode());
+        employee.setCreatedAt(newCreat.getCreatedAt());
+
+        employeeRepository.save(employee);
+        return ErrorKinds.SUCCESS;
+
+    }
+
     // 従業員削除
     @Transactional
     public ErrorKinds delete(String code, UserDetail userDetail) {
