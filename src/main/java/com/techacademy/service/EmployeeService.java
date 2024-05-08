@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.techacademy.constants.ErrorKinds;
 import com.techacademy.entity.Employee;
+import com.techacademy.entity.Report;
 import com.techacademy.repository.EmployeeRepository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,11 +21,16 @@ public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ReportService reportService;
+
 
     @Autowired
-    public EmployeeService(EmployeeRepository employeeRepository, PasswordEncoder passwordEncoder) {
+    public EmployeeService(EmployeeRepository employeeRepository, PasswordEncoder passwordEncoder,ReportService reportService) {
         this.employeeRepository = employeeRepository;
         this.passwordEncoder = passwordEncoder;
+        this.reportService = reportService;
+
+
     }
 
     // 従業員保存
@@ -54,7 +60,7 @@ public class EmployeeService {
 
     @Transactional // 従業員更新
     public ErrorKinds update(Employee employee) {
-       
+
         if ("".equals(employee.getPassword())) {
 
             Employee existingEmployee = findByCode(employee.getCode());
@@ -66,7 +72,7 @@ public class EmployeeService {
                 return result;
             }
         }
-        
+
         LocalDateTime now = LocalDateTime.now();
         employee.setUpdatedAt(now);
 
@@ -91,12 +97,20 @@ public class EmployeeService {
         employee.setUpdatedAt(now);
         employee.setDeleteFlg(true);
 
+        // 日報を取得
+        List<Report> reportList = reportService.findByEmployee(employee);
+
+     // IDを指定して、日報情報を削除
+        for (Report report : reportList) {
+           reportService.delete(report.getId());
+        }
         return ErrorKinds.SUCCESS;
     }
 
     // 従業員一覧表示処理
     public List<Employee> findAll() {
         return employeeRepository.findAll();
+
     }
 
     // 1件を検索

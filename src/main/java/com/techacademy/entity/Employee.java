@@ -2,10 +2,12 @@
 package com.techacademy.entity;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.validator.constraints.Length;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -13,6 +15,9 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.persistence.OneToMany;
+
 import lombok.Data;
 
 @Data
@@ -34,6 +39,8 @@ public class Employee {
             return this.name;
         }
     }
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL)
+    private List<Report> reportList;
 
     // ID
     @Id
@@ -46,6 +53,7 @@ public class Employee {
     @Column(length = 20, nullable = false)
     @NotEmpty
     @Length(max = 20)
+    @NotNull
     private String name;
 
     // 権限
